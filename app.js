@@ -123,7 +123,7 @@ function renderCompletedTasks(tasks) {
     <div class="list-item" style="animation-delay: ${index * 0.05}s">
       <div class="content">
         <div class="title">${escapeHtml(task.description)}</div>
-        <div class="meta">Completed: ${new Date(task.date).toLocaleDateString()}</div>
+        <div class="meta">Completed: ${formatDate(task.date)}</div>
       </div>
       <button class="delete-btn" onclick="deleteCompletedTask(${task.id})">×</button>
     </div>
@@ -179,7 +179,7 @@ function renderUpcomingTasks(tasks) {
     <div class="list-item" style="animation-delay: ${index * 0.05}s">
       <div class="content">
         <div class="title">${escapeHtml(task.description)}</div>
-        <div class="meta">Due: ${new Date(task.dueDate).toLocaleDateString()}</div>
+        <div class="meta">Due: ${formatDate(task.dueDate)}</div>
       </div>
       <button class="delete-btn" onclick="deleteUpcomingTask(${task.id})">×</button>
     </div>
@@ -433,6 +433,19 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Format date without timezone issues
+// Input: "2025-01-12" (YYYY-MM-DD string from date input)
+// Output: "1/12/2025" (locale string of that exact date)
+function formatDate(dateString) {
+  if (!dateString) return '';
+  
+  // Parse the date as local time, not UTC
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day); // month is 0-indexed
+  
+  return date.toLocaleDateString();
 }
 
 function exportData() {
