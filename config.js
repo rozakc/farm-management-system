@@ -18,7 +18,7 @@ const TTN_CONFIG = {
     return `wss://nam1.cloud.thethings.network:8084/mqtt`;
   },
   get username() {
-    return `nam1.rozafarm`;
+    return `rozafarm@nam1`;
   }
 };
 const TTN_ENABLED = true;
