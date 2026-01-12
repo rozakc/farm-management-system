@@ -187,7 +187,11 @@ const Sensors = {
     
     // Determine primary value to display
     let value, displayUnit;
-    if (type === 'soil_moisture') {
+    if (type === 'motion') {
+      // Motion sensor - display trigger count
+      value = payload.trigger_count || payload.digital_pb14 || 0;
+      displayUnit = 'triggers';
+    } else if (type === 'soil_moisture') {
       value = payload.moisture || payload.humidity || payload.value || 0;
       displayUnit = unit || '%';
     } else if (type === 'temperature') {
@@ -203,7 +207,18 @@ const Sensors = {
     // Check thresholds
     let status = 'good';
     let statusClass = 'good';
-    if (thresholds) {
+    
+    if (type === 'motion') {
+      // Motion sensor status based on trigger count and time
+      const motionDetected = payload.pir_triggered || payload.motion === 'detected';
+      if (motionDetected) {
+        status = 'Motion Detected 🚨';
+        statusClass = 'alert';
+      } else {
+        status = 'No Motion ✓';
+        statusClass = 'good';
+      }
+    } else if (thresholds) {
       if (value < thresholds.min) {
         status = 'Low ⚠️';
         statusClass = 'alert';
@@ -216,9 +231,15 @@ const Sensors = {
     }
     
     // Calculate percentage for bar
-    const percentage = thresholds 
-      ? Math.min(100, Math.max(0, ((value - thresholds.min) / (thresholds.max - thresholds.min)) * 100))
-      : 50;
+    let percentage;
+    if (type === 'motion') {
+      // For motion, show 100% if motion detected, 0% otherwise
+      percentage = (payload.pir_triggered || payload.motion === 'detected') ? 100 : 0;
+    } else if (thresholds) {
+      percentage = Math.min(100, Math.max(0, ((value - thresholds.min) / (thresholds.max - thresholds.min)) * 100));
+    } else {
+      percentage = 50;
+    }
     
     // Time since last update
     const timeDiff = Date.now() - new Date(lastUpdate).getTime();

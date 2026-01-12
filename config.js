@@ -12,17 +12,39 @@ const FIREBASE_CONFIG = {
 const FIREBASE_ENABLED = true;
 const TTN_CONFIG = {
   tenant: 'nam1',
-  applicationId: '',
-  apiKey: '',
+  applicationId: 'rozafarm',
+  apiKey: 'NNSXS.4AEY55F45DWRI44J6TH7AAPXIYQXGYJREMQKKCY.QL54P5FQIPLJQACSWE26ONWMSZFFOP7AGWIERFU7B754WUQZ636A',
   get brokerUrl() {
-    return `wss://${this.tenant}.cloud.thethings.network:8084/mqtt`;
+    return `wss://nam1.cloud.thethings.network:8084/mqtt`;
   },
   get username() {
-    return `${this.applicationId}@${this.tenant}`;
+    return `nam1.rozafarm`;
   }
 };
-const TTN_ENABLED = false;
-const SENSOR_MAPPINGS = {};
+const TTN_ENABLED = true;
+const SENSOR_MAPPINGS = {
+  'roza-node-1': {
+    name: 'Motion Sensor - Location 1',  // Update these!
+    type: 'motion',
+    unit: '',
+    location: 'Area 1',
+    thresholds: { min: 0, max: 1 }
+  },
+  'roza-node-2': {
+    name: 'Motion Sensor - Location 2',
+    type: 'motion',
+    unit: '',
+    location: 'Area 2',
+    thresholds: { min: 0, max: 1 }
+  },
+  'roza-node-3': {
+    name: 'Motion Sensor - Location 3',
+    type: 'motion',
+    unit: '',
+    location: 'Area 3',
+    thresholds: { min: 0, max: 1 }
+  }
+};
 const APP_CONFIG = {
   farmName: 'My Farm',
   location: 'West Pasco, Washington, US',
