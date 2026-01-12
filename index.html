@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farm Command Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  
+  <!-- MQTT for TTN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="header">
+    <h1>🌾 Farm Command Center</h1>
+    <p>Intelligent farm management with IoT sensors and AI assistance</p>
+    <div class="sync-status" id="syncStatus">
+      <span class="status-dot"></span>
+      <span class="status-text">Initializing...</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Settings Panel -->
+    <div class="card settings-card">
+      <h2>⚙️ Settings</h2>
+      <div class="settings-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="firebaseSyncToggle" checked>
+          <span>Enable Firebase Cloud Sync</span>
+        </label>
+        <div class="setting-info">Last synced: <span id="lastSync">Never</span></div>
+      </div>
+      <div class="settings-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="ttnToggle" checked>
+          <span>Enable TTN Sensor Feed</span>
+        </label>
+        <div class="setting-info">Status: <span id="ttnStatus">Disconnected</span></div>
+      </div>
+      <div class="button-group">
+        <button onclick="exportData()" class="secondary">📥 Export Data</button>
+        <button onclick="importData()" class="secondary">📤 Import Data</button>
+        <button onclick="manualSync()" id="syncButton">🔄 Sync Now</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display: none;">
+    </div>
+
+    <!-- Dashboard Overview -->
+    <div class="card full-width">
+      <h2>Dashboard Overview</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span class="number" id="taskCount">0</span>
+          <span class="label">Completed Tasks</span>
+        </div>
+        <div class="stat-card">
+          <span class="number" id="upcomingCount">0</span>
+          <span class="label">Upcoming Tasks</span>
+        </div>
+        <div class="stat-card">
+          <span class="number" id="noteCount">0</span>
+          <span class="label">Notes</span>
+        </div>
+        <div class="stat-card">
+          <span class="number" id="knowledgeCount">0</span>
+          <span class="label">Knowledge Items</span>
+        </div>
+      </div>
+
+      <!-- Weather Widget -->
+      <div class="weather-widget">
+        <h3>☀️ Weather Forecast</h3>
+        <div class="weather-content" id="weatherContent">
+          <div class="loading">Loading weather data...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IoT Sensor Dashboard -->
+    <div class="card full-width">
+      <h2>📡 Live Sensor Data (LoRaWAN/TTN)</h2>
+      <div id="sensorDashboard">
+        <div class="empty-state">
+          Waiting for sensor data from The Things Network...<br>
+          <small>Configure TTN settings in config.js</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed Tasks -->
+    <div class="card">
+      <h2>Completed Tasks</h2>
+      <div class="input-group">
+        <label>Task Description</label>
+        <input type="text" id="completedTaskInput" placeholder="What did you complete today?">
+      </div>
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="completedTaskDate">
+      </div>
+      <button onclick="addCompletedTask()">Add Task</button>
+      <div id="completedTasksList" style="margin-top: 1.5rem;"></div>
+    </div>
+
+    <!-- Upcoming Tasks -->
+    <div class="card">
+      <h2>Upcoming Tasks</h2>
+      <div class="input-group">
+        <label>Task Description</label>
+        <input type="text" id="upcomingTaskInput" placeholder="What needs to be done?">
+      </div>
+      <div class="input-group">
+        <label>Due Date</label>
+        <input type="date" id="upcomingTaskDate">
+      </div>
+      <button onclick="addUpcomingTask()">Add Task</button>
+      <div id="upcomingTasksList" style="margin-top: 1.5rem;"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card full-width">
+      <h2>Notes & Observations</h2>
+      <div class="input-group">
+        <label>Note</label>
+        <textarea id="noteInput" placeholder="Record observations, ideas, or reminders..."></textarea>
+      </div>
+      <button onclick="addNote()">Add Note</button>
+      <div id="notesList" style="margin-top: 1.5rem;"></div>
+    </div>
+
+    <!-- Farm Knowledge Base -->
+    <div class="card full-width">
+      <h2>Farm Knowledge Base</h2>
+      <p style="margin-bottom: 1.5rem; color: var(--earth-medium);">
+        Teach your AI assistant about your farm's history, practices, and preferences.
+      </p>
+      <div class="input-group">
+        <label>Topic/Category</label>
+        <input type="text" id="knowledgeTopic" placeholder="e.g., Crop Rotation, Irrigation Schedule, Equipment Maintenance">
+      </div>
+      <div class="input-group">
+        <label>Details</label>
+        <textarea id="knowledgeContent" placeholder="Describe your practices, historical data, preferences, etc..."></textarea>
+      </div>
+      <button onclick="addKnowledge()">Add to Knowledge Base</button>
+      <div id="knowledgeList" style="margin-top: 1.5rem;"></div>
+    </div>
+
+    <!-- AI Assistant Chat -->
+    <div class="card full-width">
+      <h2>🤖 AI Farm Assistant</h2>
+      <p style="margin-bottom: 1.5rem; color: var(--earth-medium);">
+        Ask questions about your farm data, sensor readings, get advice, and receive insights.
+      </p>
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message assistant">
+            <div class="message-content">
+              <div class="role">Farm Assistant</div>
+              Hello! I'm your AI farm assistant. I have access to all your farm data including tasks, notes, knowledge base, and live sensor readings. Ask me anything about your farm operations!
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <div class="chat-input-container">
+            <textarea id="chatInput" placeholder="Ask about your farm data, get recommendations, analyze trends..."></textarea>
+            <button onclick="sendMessage()" style="align-self: flex-end;">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="storage.js"></script>
+  <script src="sensors.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

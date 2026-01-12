@@ -1,0 +1,46 @@
+# Sensitive configuration files
+config.js
+
+# API keys and secrets
+*.key
+*.pem
+.env
+.env.local
+
+# Node modules (if you add any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
