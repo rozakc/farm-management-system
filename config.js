@@ -15,10 +15,10 @@ const TTN_CONFIG = {
   applicationId: 'rozafarm',
   apiKey: 'NNSXS.4AEY55F45DWRI44J6TH7AAPXIYQXGYJREMQKKCY.QL54P5FQIPLJQACSWE26ONWMSZFFOP7AGWIERFU7B754WUQZ636A',
   get brokerUrl() {
-    return `wss://nam1.cloud.thethings.network:8084/mqtt`;
+    return `wss://${this.tenant}.cloud.thethings.network:8084/mqtt`;
   },
   get username() {
-    return `rozafarm@nam1`;
+    return `${this.applicationId}@${this.tenant}`;
   }
 };
 const TTN_ENABLED = true;

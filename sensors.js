@@ -50,8 +50,11 @@ const Sensors = {
       console.log('📡 Connecting to TTN MQTT broker...');
       this.updateStatus('connecting');
       
+      // TTN WebSocket MQTT endpoint - port 8884 for WSS
+      const wsUrl = `wss://${window.TTN_CONFIG.tenant}.cloud.thethings.network:8884/mqtt`;
+      
       // Create MQTT client
-      this.client = mqtt.connect(window.TTN_CONFIG.brokerUrl, {
+      this.client = mqtt.connect(wsUrl, {
         username: window.TTN_CONFIG.username,
         password: window.TTN_CONFIG.apiKey,
         reconnectPeriod: 5000,
